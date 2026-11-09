@@ -1,0 +1,108 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>He vs She — Pick One!</title><meta name="theme-color" content="#ec4899"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="He vs She Pick One"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon.png"><link rel="manifest" href="manifest.json"><style>
+body{font-family:system-ui,sans-serif;background:#fdf2f8;color:#831843;margin:0;padding:18px;text-align:center}
+h1{font-size:30px;margin:8px 0 4px}.sub{font-size:19px;color:#9d174d;max-width:640px;margin:0 auto}
+.stage{background:#fff;border-radius:24px;max-width:680px;margin:18px auto;padding:22px;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+.action{font-size:96px;line-height:1}.action-label{font-size:26px;font-weight:800;margin:6px 0 14px}
+.prompt{font-size:24px;font-weight:700}
+.choices{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.pick{flex:1;min-width:220px;background:#fff7ed;border:4px solid #f59e0b;border-radius:20px;padding:18px;cursor:pointer}
+.pick.girl{border-color:#ec4899}
+.pick .face{font-size:88px}
+.pick .who{font-size:26px;font-weight:800}
+.pick.selected{outline:5px solid #16a34a;background:#f0fdf4}
+.pron{font-size:24px;font-weight:800;padding:16px 26px;border-radius:16px;border:4px solid #3b82f6;background:#eff6ff;color:#1e40af;margin:6px;cursor:pointer}
+.pron.she{border-color:#ec4899;background:#fdf2f8;color:#9d174d}
+.pron.selected{outline:5px solid #16a34a}
+.sentence{font-size:32px;font-weight:800;color:#0f766e;margin:14px 0}
+button{font-size:20px;padding:14px 20px;border:0;border-radius:14px;background:#ec4899;color:#fff;margin:6px;cursor:pointer}
+button.alt{background:#fce7f3;color:#831843}
+button.go{background:#16a34a}
+.feedback{font-size:26px;font-weight:800;min-height:36px}
+.small{color:#9d174d;font-size:16px}
+.progress{font-size:18px;font-weight:700}
+</style></head><body>
+<h1>👦 He vs She — Pick One! 👧</h1>
+<p class="sub">The boy and the girl are doing the <b>same</b> thing. Pick one, say <b>he</b> or <b>she</b>, then say the whole sentence out loud!</p>
+<div class="stage">
+  <div class="action" id="actionEmoji">🏃</div>
+  <div class="action-label" id="actionLabel">running</div>
+  <div class="prompt" id="prompt">Who is running? Pick one!</div>
+  <div class="choices">
+    <div class="pick" id="pickBoy" onclick="pick('boy')"><div class="face">👦</div><div class="who">Boy</div><div>Tap me!</div></div>
+    <div class="pick girl" id="pickGirl" onclick="pick('girl')"><div class="face">👧</div><div class="who">Girl</div><div>Tap me!</div></div>
+  </div>
+  <div id="step2" style="display:none">
+    <div class="prompt">Now pick the word:</div>
+    <button class="pron" id="btnHe" onclick="pronoun('he')">He</button>
+    <button class="pron she" id="btnShe" onclick="pronoun('she')">She</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+  <div id="step3" style="display:none">
+    <div class="sentence" id="sentence"></div>
+    <div class="prompt" style="font-size:20px">Say it out loud, then tap:</div>
+    <div><button class="alt" onclick="hear()">🔊 Hear it</button>
+    <button class="go" onclick="saidIt()">🗣️ I said it! ⭐</button></div>
+  </div>
+</div>
+<div><button class="alt" onclick="prev()">⬅ Back</button><button class="alt" onclick="next()">Next ➜</button><button class="alt" onclick="shuffle()">🔀 Shuffle</button></div>
+<p class="progress" id="score"></p>
+<p class="small">Step 1: pick boy or girl &nbsp;•&nbsp; Step 2: pick he or she &nbsp;•&nbsp; Step 3: say “He is ___!” or “She is ___!”<br>Save like an app: Safari → Share → Add to Home Screen.</p>
+<script>
+const A=[
+ ["🏃","running","He is running!","She is running!"],
+ ["🍎","eating","He is eating!","She is eating!"],
+ ["📖","reading","He is reading!","She is reading!"],
+ ["🏊","swimming","He is swimming!","She is swimming!"],
+ ["😴","sleeping","He is sleeping!","She is sleeping!"],
+ ["💃","dancing","He is dancing!","She is dancing!"],
+ ["⚽","playing soccer","He is playing soccer!","She is playing soccer!"],
+ ["🎨","painting","He is painting!","She is painting!"],
+ ["🚲","riding a bike","He is riding a bike!","She is riding a bike!"],
+ ["🥛","drinking milk","He is drinking milk!","She is drinking milk!"],
+ ["😊","smiling","He is smiling!","She is smiling!"],
+ ["🎵","singing","He is singing!","She is singing!"]
+];
+let i=0, stars=0, chosen=null, pron=null;
+function render(){
+  document.getElementById('actionEmoji').textContent=A[i][0];
+  document.getElementById('actionLabel').textContent=A[i][1];
+  document.getElementById('prompt').textContent='Who is '+A[i][1]+'? Pick one!';
+  document.getElementById('pickBoy').classList.remove('selected');
+  document.getElementById('pickGirl').classList.remove('selected');
+  document.getElementById('btnHe').classList.remove('selected');
+  document.getElementById('btnShe').classList.remove('selected');
+  document.getElementById('step2').style.display='none';
+  document.getElementById('step3').style.display='none';
+  document.getElementById('feedback').textContent='';
+  document.getElementById('score').textContent='⭐ Stars: '+stars+'  •  Card '+(i+1)+' of '+A.length;
+}
+function pick(who){
+  chosen=who; pron=null;
+  document.getElementById('pickBoy').classList.toggle('selected', who==='boy');
+  document.getElementById('pickGirl').classList.toggle('selected', who==='girl');
+  document.getElementById('step2').style.display='block';
+  document.getElementById('feedback').textContent='Good! You picked the '+(who==='boy'?'boy':'girl')+'. Now — he or she?';
+}
+function pronoun(p){
+  if(!chosen){document.getElementById('feedback').textContent='Pick the boy or the girl first!';return;}
+  pron=p;
+  document.getElementById('btnHe').classList.toggle('selected', p==='he');
+  document.getElementById('btnShe').classList.toggle('selected', p==='she');
+  const correct = (chosen==='boy' && p==='he') || (chosen==='girl' && p==='she');
+  const fb=document.getElementById('feedback');
+  if(correct){
+    fb.textContent='✅ Yes! '+(chosen==='boy'?'Boy = He':'Girl = She');
+    document.getElementById('sentence').textContent = chosen==='boy' ? A[i][2] : A[i][3];
+    document.getElementById('step3').style.display='block';
+  } else {
+    fb.textContent='🤔 Try again! '+(chosen==='boy'?'A boy is “he”.':'A girl is “she”.');
+    document.getElementById('step3').style.display='none';
+  }
+}
+function hear(){ if(chosen){ try{speechSynthesis.speak(new SpeechSynthesisUtterance(chosen==='boy'?A[i][2]:A[i][3]))}catch(e){} } }
+function saidIt(){ stars++; next(); }
+function next(){ i=(i+1)%A.length; chosen=null; pron=null; render(); }
+function prev(){ i=(i-1+A.length)%A.length; chosen=null; pron=null; render(); }
+function shuffle(){ A.sort(()=>Math.random()-.5); i=0; chosen=null; pron=null; render(); }
+render();
+</script></body></html>
